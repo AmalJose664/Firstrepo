@@ -40,7 +40,7 @@ async function main() {
     }
 }
 
-//main().catch(console.error);
+main().catch(console.error);
 
 const app = express()
 app.use(morgan('dev'));
@@ -82,7 +82,8 @@ app.post('/files', upload.single('image'), (req, res) => {
     console.log(req.file);
     
     let image = req.file
-    if (image.size < 5300000){
+    let exten = image.originalname.split('.').pop().toLowerCase();
+    if (image.size < 5300000 && (exten === "jpg" || exten === "png")){
         fs.rename(image.path, "./fileStore/" + image.originalname, (err) => {
             if (err) {
                 res.send("File was not a Sucess Check spaces");
@@ -100,7 +101,7 @@ app.post('/files', upload.single('image'), (req, res) => {
                 
             }
         })
-        res.send("File was not a Sucess Becouse size exceeded");
+        res.send("File was not a Sucess Becouse size exceeded or filetype was not supported ");
     }
     
     
