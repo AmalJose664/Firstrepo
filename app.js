@@ -1,9 +1,12 @@
  const express = require('express')
  const morgan = require('morgan')
 const { MongoClient } = require('mongodb');
+var fs = require('fs');
+var fileUpload = require('express-fileupload');
+const multer = require('multer');
 
 
-let data
+let data = null;
 async function listDatabases(client) {
     data = await client.db("sample_mflix").collection("users").find().toArray();
     console.log("Databases:", await data.length);
@@ -37,7 +40,7 @@ async function main() {
     }
 }
 
-main().catch(console.error);
+//main().catch(console.error);
 
 const app = express()
 app.use(morgan('dev'));
@@ -68,7 +71,41 @@ app.get('/about', (req, res) => {
     res.render('about',{data});
 });
 
+app.get('/files', (req, res) => {
+    res.render('files', { data });
+});
 
+const upload = multer({ dest: './fileStore' });
+app.post('/files', upload.single('image'), (req, res) => {
+    console.log("recieved request for file");
+    
+    console.log(req.file);
+    
+    let image = req.file
+    if (image.size < 5300000){
+        fs.rename(image.path, "./fileStore/" + image.originalname, (err) => {
+            if (err) {
+                res.send("File was not a Sucess Check spaces");
+                console.log(err);
+                return
+
+            }
+            res.send("File was a Sucess")
+
+        })
+    }else{
+        fs.unlink("fileStore/"+image.filename,(err)=>{
+            if(err){
+                console.log(err);
+                
+            }
+        })
+        res.send("File was not a Sucess Becouse size exceeded");
+    }
+    
+    
+});
 app.use( (req, res) => {
     res.status(404).render('404');
 });
+

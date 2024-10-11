@@ -1,0 +1,22 @@
+
+
+Welcome to files part you can uploaad an test here
+
+<section>
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-nd-6 ml-5">
+                <h2 class="text-center">Add images</h2>
+                <form action="/files" enctype="multipart/form-data" method="post">
+                    
+                    <label for="image">Image</label>
+                    <input type="file" name="image" class="form-control" required>
+
+                    <input type="submit" class="btn btn-success mt-3"></input>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('./partials/foot.ejs') %>
