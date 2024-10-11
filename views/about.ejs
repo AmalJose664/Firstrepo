@@ -1,0 +1,14 @@
+<%- include('./partials/top.ejs') %>
+
+<p>this is about page </p>
+
+<% data.forEach(element => { %>
+    <div style="margin: 30px 200px; border: 1px solid black; border-radius: 8px; padding: 10px;font-family: sans-serif;">
+        <%= element.name %>
+            <br>
+            <%= element.email %>
+                <br>
+    </div>
+<% }); %>
+
+<%- include('./partials/foot.ejs') %>
