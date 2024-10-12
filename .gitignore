@@ -5,4 +5,5 @@ fileStore/*
 # But include the folder itself
 !fileStore/
 git rm --cached fileStore/*
+.env
 

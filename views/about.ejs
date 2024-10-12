@@ -2,14 +2,16 @@
 
 <p>this is about page </p>
 
-<% if (data) { %>
-<% data.forEach(element=> { %>
+
+
+<% if (users) { %>
+<% users.forEach(function(user) { %>
     <div
         style="margin: 30px 200px; border: 1px solid black; border-radius: 8px; padding: 10px;font-family: sans-serif;">
-        <%= element.name %>
+        <%= user.name %>
             <br>
-            <%= element.email %>
-                <br>
+        <%= user.email %>
+            <br>
     </div>
     <% }); %>
 <% } %>

@@ -1,0 +1,7 @@
+you can see them as <br>
+
+<% if (image) { %>
+    <% image.forEach(element => { %>
+        <img style="width: 100px; height: auto; margin: 20px;" src="<%= element.src %>" alt="image"> <br>
+    <% }) %>
+<% } %>

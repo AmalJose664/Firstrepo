@@ -1,59 +1,42 @@
  const express = require('express')
  const morgan = require('morgan')
-const { MongoClient } = require('mongodb');
+const mongoose = require('mongoose');
+const Picture = require('./base');
 var fs = require('fs');
-var fileUpload = require('express-fileupload');
+var dotenv = require('dotenv')
+dotenv.config()
 const multer = require('multer');
+mongoose.set('strictQuery',false);
 
 
-let data = null;
-async function listDatabases(client) {
-    data = await client.db("sample_mflix").collection("users").find().toArray();
-    console.log("Databases:", await data.length);
+let db;
 
+async function connectToDatabase() {
     
-    
-};
-
-async function main() {
-    /**
-     * Connection URI. Update <username>, <password>, and <your-cluster-url> to reflect your cluster.
-     * See https://docs.mongodb.com/ecosystem/drivers/node/ for more details
-     */
-    const uri = "mongodb+srv://amal446446:aVPCLGOoWEslqZhs@testing.66hfq.mongodb.net/?retryWrites=true&w=majority&appName=Testing";
-
-
-    const client = new MongoClient(uri);
-    //console.log(client);
-    
-    try {
-        // Connect to the MongoDB cluster
-        await client.connect();
-
-        // Make the appropriate DB calls
-        await listDatabases(client);
-
-    } catch (e) {
-        console.error(e);
-    } finally {
-        await client.close();
+    const uri = process.env.uri;
+    try{
+        await mongoose.connect(uri)
+        db = mongoose.connection.db
+        console.log("connected to database");
+    }catch(e){
+        console.log("============================",e.message,"=====================");
+        
     }
+    
 }
 
-main().catch(console.error);
+
 
 const app = express()
 app.use(morgan('dev'));
 
-port = 4000
+port = process.env.PORT || 4000 
  app.set("view engine","ejs")
- 
+app.use(express.static('public'));
 
- app.listen(port,()=>{
-    console.log("Listening started on port ",port)
- })
 
- app.get('/',(req,res)=>{
+
+ app.get('/',async (req,res)=>{
     
 
     let blog = [
@@ -67,12 +50,20 @@ port = 4000
 
 
 
-app.get('/about', (req, res) => {
-    res.render('about',{data});
+app.get('/about', async (req, res) => {
+    try {
+        const data =  await Picture.find().lean();
+        
+        console.log()
+        res.render('about', { users: data });
+    } catch (e) {
+        res.status(500).json({error:e.message});
+    }
+    
 });
 
 app.get('/files', (req, res) => {
-    res.render('files', { data });
+    res.render('files', {  });
 });
 
 const upload = multer({ dest: './fileStore' });
@@ -83,15 +74,26 @@ app.post('/files', upload.single('image'), (req, res) => {
     
     let image = req.file
     let exten = image.originalname.split('.').pop().toLowerCase();
+    console.log(image);
+    
     if (image.size < 5300000 && (exten === "jpg" || exten === "png")){
-        fs.rename(image.path, "./fileStore/" + image.originalname, (err) => {
+        fs.rename(image.path, "./public/" + image.filename +'.' +exten, (err) => {
             if (err) {
                 res.send("File was not a Sucess Check spaces");
                 console.log(err);
                 return
 
             }
-            res.send("File was a Sucess")
+            console.log();
+            
+            res.send("File was a Sucess");
+            const newPicture = new Picture({
+                fName: image.originalname,
+                src: "./" + image.filename + '.' + exten
+            })
+            newPicture.save();
+            console.log(newPicture);
+            
 
         })
     }else{
@@ -106,7 +108,31 @@ app.post('/files', upload.single('image'), (req, res) => {
     
     
 });
+
+app.get('/images',async(req,res)=>{
+    
+    let images = await db.collection('images').find().toArray()
+    
+         console.log(images);
+         res.render('images',{image:images})
+   
+
+})
+
+
 app.use( (req, res) => {
     res.status(404).render('404');
 });
+
+
+connectToDatabase().then(()=>{
+    
+    app.listen(port, () => {
+        console.log("Listening started on port ", port)
+        
+    })
+}).catch(err =>{
+    console.log('Failed to connect to the database. Server not started.',err);
+    
+})
 
