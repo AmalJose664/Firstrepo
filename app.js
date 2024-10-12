@@ -74,7 +74,7 @@ app.post('/files', upload.single('image'), (req, res) => {
     
     let image = req.file
     let exten = image.originalname.split('.').pop().toLowerCase();
-    console.log(image);
+    
     
     if (image.size < 5300000 && (exten === "jpg" || exten === "png")){
         fs.rename(image.path, "./public/" + image.filename +'.' +exten, (err) => {
@@ -84,7 +84,6 @@ app.post('/files', upload.single('image'), (req, res) => {
                 return
 
             }
-            console.log();
             
             res.send("File was a Sucess");
             const newPicture = new Picture({
@@ -92,7 +91,6 @@ app.post('/files', upload.single('image'), (req, res) => {
                 src: "./" + image.filename + '.' + exten
             })
             newPicture.save();
-            console.log(newPicture);
             
 
         })

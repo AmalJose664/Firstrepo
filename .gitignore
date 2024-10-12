@@ -2,8 +2,12 @@ node_modules/
 # Exclude all contents of the folder
 fileStore/*
 
-# But include the folder itself
+
 !fileStore/
+public/*
+
+
+!public/
 git rm --cached fileStore/*
 .env
 
