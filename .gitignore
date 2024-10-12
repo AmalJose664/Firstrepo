@@ -6,8 +6,6 @@ fileStore/*
 !fileStore/
 public/*
 
-
-!public/
 git rm --cached fileStore/*
 .env
 
