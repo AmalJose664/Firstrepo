@@ -4,7 +4,7 @@ fileStore/*
 
 
 !fileStore/
-/public/
+
 
 
 .env
