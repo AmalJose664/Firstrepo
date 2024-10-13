@@ -1,11 +1,6 @@
 node_modules/
-# Exclude all contents of the folder
-fileStore/*
 
-
-!fileStore/
-
-
+secrets.txt
 
 .env
 

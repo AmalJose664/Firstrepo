@@ -12,11 +12,24 @@ Welcome to files part you can uploaad an test here
                     <label for="image">Image</label>
                     <input type="file" name="image" class="form-control" required>
 
-                    <input type="submit" class="btn btn-success mt-3"></input>
+                    <input type="submit" id="btn" onclick="formSubmit()"></input>
                 </form>
             </div>
         </div>
     </div>
 </section>
+<div style="display: none;" id="show">
 
+    Image Uploading after pressing submit can take time according to your data connection and server's Connection and also the files Used<br>
+    Please wait for that and also dont slam the submit button more than once.  
+</div>
 <%- include('./partials/foot.ejs') %>
+<script>
+    const text = document.getElementById('show')
+    const btn = document.getElementById('btn')
+    function formSubmit(){
+        text.style.display="block"
+        btn.style.pointerEvents="none"
+
+    }
+</script>

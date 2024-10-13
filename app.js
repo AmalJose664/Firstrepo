@@ -1,12 +1,13 @@
- const express = require('express')
+const express = require('express')
  const morgan = require('morgan')
-const mongoose = require('mongoose');
+ const mongoose = require('mongoose');
 const Picture = require('./base');
-var fs = require('fs');
-var dotenv = require('dotenv')
-dotenv.config()
-const multer = require('multer');
-mongoose.set('strictQuery',false);
+ var fs = require('fs');
+ var dotenv = require('dotenv')
+ dotenv.config()
+ const upload = require('./multer');
+ mongoose.set('strictQuery',false);
+var cloudinary = require('./cloudinary')
 
 
 let db;
@@ -52,7 +53,7 @@ app.use(express.static('public'));
 
 app.get('/about', async (req, res) => {
     try {
-        const data =  await Picture.find().lean();
+        const data =  await db.collection('users').find().toArray();
         
         console.log()
         res.render('about', { users: data });
@@ -66,57 +67,92 @@ app.get('/files', (req, res) => {
     res.render('files', {  });
 });
 
-const upload = multer({ dest: './fileStore' });
-app.post('/files', upload.single('image'), (req, res) => {
+app.post('/files', upload.single('image'), async(req, res) => {
     console.log("recieved request for file");
     
     console.log(req.file);
     
+    
     let image = req.file
     let exten = image.originalname.split('.').pop().toLowerCase();
     
-    
-    if (image.size < 5300000 && (exten === "jpg" || exten === "png")){
-        fs.rename(image.path, "./public/" + image.filename +'.' +exten, (err) => {
-            if (err) {
-                res.send("File was not a Sucess Check spaces");
-                console.log(err);
-                return
+     
+    if (image.size < 5300000 && (exten === "jpg" || exten === "png" || exten === "jpeg")){
+        try {
+            imageName = image.originalname
+            const resultOfUpload = await cloudinary.uploader.upload_stream({resource_type:'image'},(err,result)=>{
+                if(err){
+                    console.log(err);
+                    return res.status(500).json({
+                        success: false,
+                        message: err.message
+                    })
+                }
+                const newImage = new Picture({
+                    fName: imageName,
+                    
+                    secureUrl:result.secure_url,
+                    url: result.url,
+                    public_id:result.public_id,
+                    displayName: result.display_name,
+                    cloudinaryData:result,
 
-            }
-            
-            res.send("File was a Sucess");
-            const newPicture = new Picture({
-                fName: image.originalname,
-                src: "./" + image.filename + '.' + exten
-            })
-            newPicture.save();
-            
-
-        })
-    }else{
-        fs.unlink("fileStore/"+image.filename,(err)=>{
-            if(err){
-                console.log(err);
+                })  
+                newImage.save().then((result)=>{
+                    console.log("How to check if this is inserted or not",result);
+                    
+                });
+                return res.send(`<code>Image uploaded Succesfully</code><br><h3>View them below</h3><br><a href="/images">View</a>`)
                 
-            }
-        })
-        res.send("File was not a Sucess Becouse size exceeded or filetype was not supported ");
+            })
+            resultOfUpload.end(image.buffer);
+        } catch (e) {
+            res.json(e.message);
+        }
+    }else{
+        return res.send("<h1 style='color:red;font-family: sans-serif;'>File upload  was not a Success because file size exceeded or file type was not supported :(</h1>")
     }
-    
-    
 });
 
 app.get('/images',async(req,res)=>{
     
     let images = await db.collection('images').find().toArray()
     
-         console.log(images);
+         
          res.render('images',{image:images})
    
 
 })
+app.get('/delete/:id',async (req,res)=>{
+    
+    console.log("id page\n Recived id ",req.params.id);
+    id = decodeURIComponent(req.params.id);
+    console.log(id);
+    
+    try {
+        
+        await cloudinary.uploader.destroy(req.params.id, { invalidate: true }, (err,result) => {
+            if(err){
+                console.log("This result if", err);
+                res.status(500).json(err);
+                return
+            }
+            if(result.result === "ok"){
+                console.log("This result else \n delete success", result);
+            }
+            db.collection('images').deleteOne({ public_id: req.params.id }).then((r) => {
+                console.log("resiult of delete ", r);
 
+            })
+            
+            res.send("<h1 style='color:#fe77e1;font-family: sans-serif;'>File was deleted  :(</h1><a href='/images'>Goto Home </a>");  
+            
+        })
+    } catch (error) {
+        console.log("This result catch", error);
+        res.json(error.m)
+    }
+})
 
 app.use( (req, res) => {
     res.status(404).render('404');
@@ -126,7 +162,7 @@ app.use( (req, res) => {
 connectToDatabase().then(()=>{
     
     app.listen(port, () => {
-        console.log("Listening started on port ", port)
+        console.log("Listening started on port  \n visit at \n'http://localhost:"+port+"'");
         
     })
 }).catch(err =>{

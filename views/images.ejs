@@ -1,7 +1,60 @@
-you can see them as <br>
 
+<div style="display: flex; ">
+    you can see them as <br>
+</div>
 <% if (image) { %>
-    <% image.forEach(element => { %>
-        <img style="width: 100px; height: auto; margin: 20px;" src="<%= element.src %>" alt="image"> <br>
-    <% }) %>
+    <div style="display: grid; grid-template-columns:  1fr 1fr 1fr;">
+        <% image.forEach(element=> { %>
+            <div style="padding: 30px 2rem; font-family: sans-serif;  border: 2px solid #cccccc; ">
+                <img src="<%= element.secureUrl %>" alt="Sample Image" style="width: 300px; height: auto; display: block;">
+                <h2>Image data</h2>
+                <p>Display name: <%= element.displayName %>
+                </p>
+                <a href="<%=  element.secureUrl %>">Visit Image Alone:</a>
+                <p>Name from Upload: <%= element.fName %>
+                </p>
+                <details>
+                    <summary>View More</summary>
+                    <p> Asset_id:<%= element.cloudinaryData.asset_id %></p>
+                    <p>Version:<%= element.cloudinaryData.version %></p>
+                    
+                    <p>Version id:<%= element.cloudinaryData.version_id %></p>
+                    <p>Photo Width<%= element.cloudinaryData.width %></p>
+                    
+                    <p>Photo Height  <%= element.cloudinaryData.height %></p>
+                    <p>Photo Format: <%= element.cloudinaryData.format %></p>
+                    <p>Photo Type: <%= element.cloudinaryData.resource_type %></p>
+                    <p>Photo Created At: <%= element.cloudinaryData.created_at %></p>
+                    <p>Photo Size in bytes <code><%= element.cloudinaryData.bytes %></code></p>
+                    <a href="#" onclick="deletefor('<%= element.public_id %>')">Delete this Photo</a>
+                   
+                </details>
+            </div>
+            <% }) %>
+    </div>
 <% } %>
+<script>
+    let i =0 
+    function deletefor(id){
+        i = i+1;
+        let word = prompt("Enter the secret word to delete the file");
+        if(word.toLocaleLowerCase() === "make_me_believe"){
+            alert("Success!!!!!!!") 
+            id = encodeURIComponent(id)
+            
+            window.location.href = `/delete/${id}`;
+            
+        }else{
+            alert("'" + word.toLocaleLowerCase() + "' turned out to be wrong  answer // Try again :)")
+            if (i % 3 == 0) {
+                
+                if (confirm("Want Hint ?")) {
+                    alert("Inspect the Elements you see")
+                }
+                return;
+            }
+            
+        }
+       
+    }
+</script>
