@@ -3,4 +3,5 @@ node_modules/
 secrets.txt
 
 .env
+test.js
 

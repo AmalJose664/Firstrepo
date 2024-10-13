@@ -29,6 +29,8 @@ async function connectToDatabase() {
 
 
 const app = express()
+app.use(express.urlencoded({ extended: true }));
+
 app.use(morgan('dev'));
 
 port = process.env.PORT || 4000 
@@ -152,6 +154,39 @@ app.get('/delete/:id',async (req,res)=>{
         console.log("This result catch", error);
         res.json(error.m)
     }
+})
+
+app.post('/upload-by-link',(req,res)=>{
+    let link = req.body.link;
+    
+    
+    cloudinary.uploader.upload(link, (err, result) => {
+        if (err) {
+            console.log(err.message);
+            res.send(`<h5 style="color:#005cdc;font-size:30px ;font-family:sans-serif">${err.message}</h5>`);
+            return
+
+        }
+        console.log(result);
+        const newImage = new Picture({
+            fName: result.original_filename +"."+ result.original_extension,
+
+            secureUrl: result.secure_url,
+            url: result.url,
+            public_id: result.public_id,
+            displayName: result.display_name,
+            cloudinaryData: result,
+
+        })
+        console.log(result.original_filename,);
+        
+        newImage.save().then((result) => {
+            console.log("How to check if this is inserted or not", result);
+
+        });
+        res.send(`<code>Image uploaded Succesfully</code><br><h3>View them below</h3><br><a href="/images">View</a>`)
+
+    })
 })
 
 app.use( (req, res) => {
