@@ -158,12 +158,19 @@ app.get('/delete/:id',async (req,res)=>{
 
 app.post('/upload-by-link',(req,res)=>{
     let link = req.body.link;
-    
+    function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+     }
     
     cloudinary.uploader.upload(link, (err, result) => {
         if (err) {
             console.log(err.message);
-            res.send(`<h5 style="color:#005cdc;font-size:30px ;font-family:sans-serif">${err.message}</h5>`);
+            res.send(`<h5 style="color:#005cdc;font-size:30px ;font-family:sans-serif">${escapeHtml(err.message)}</h5>`);
             return
 
         }
