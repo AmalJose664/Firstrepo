@@ -65,6 +65,16 @@ app.get('/about', async (req, res) => {
     
 });
 
+app.get('/movies', async (req, res) => {
+    try {
+        const data = await db.collection('movies').find().limit(100).toArray();
+
+        res.json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.get('/files', (req, res) => {
     res.render('files', {  });
 });
