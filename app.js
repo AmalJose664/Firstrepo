@@ -2,8 +2,8 @@ const express = require('express')
  const morgan = require('morgan')
  const mongoose = require('mongoose');
 const Picture = require('./base');
- var fs = require('fs');
  var dotenv = require('dotenv')
+const cors = require('cors');
  dotenv.config()
  const upload = require('./multer');
  mongoose.set('strictQuery',false);
@@ -30,7 +30,7 @@ async function connectToDatabase() {
 
 const app = express()
 app.use(express.urlencoded({ extended: true }));
-
+app.use(cors());
 app.use(morgan('dev'));
 
 port = process.env.PORT || 4000 
